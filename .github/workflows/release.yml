@@ -43,12 +43,6 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
-      - name: Build Docker image
-        run: |
-          docker build -t dawnbreather/release-notes-publisher:${{ steps.get_version.outputs.VERSION }} .
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push dawnbreather/release-notes-publisher:${{ steps.get_version.outputs.VERSION }}
-
       - name: Upload Release Asset (linux/amd64)
         uses: actions/upload-release-asset@v1
         env:
@@ -68,3 +62,10 @@ jobs:
           asset_path: ./release-notes-publisher.linux.arm64
           asset_name: release-notes-publisher.linux.arm64
           asset_content_type: application/octet-stream
+
+      - name: Build Docker image
+        run: |
+          docker build -t dawnbreather/release-notes-publisher:${{ steps.get_version.outputs.VERSION }} .
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push dawnbreather/release-notes-publisher:${{ steps.get_version.outputs.VERSION }}
+
