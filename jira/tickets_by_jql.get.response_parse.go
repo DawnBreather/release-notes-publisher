@@ -3,6 +3,7 @@ package jira
 import (
 	"encoding/json"
 	"fmt"
+	"html_to_xhtml_converter/xhtml"
 )
 
 // Define the JSON structure in Go structs
@@ -16,13 +17,13 @@ type Issue struct {
 }
 
 type Fields struct {
-	Issuetype   Issuetype `json:"issuetype"`
+	Description string    `json:"description"`
 	FixVersions []Version `json:"fixVersions"`
 }
 
-type Issuetype struct {
-	Description string `json:"description"`
-}
+//type Issuetype struct {
+//	Description string `json:"description"`
+//}
 
 type Version struct {
 	Name string `json:"name"`
@@ -49,7 +50,7 @@ func parseTickets(jsonResponse []byte) map[string]Ticket {
 		if len(jIssue.Fields.FixVersions) > 0 {
 			ticketMap[jIssue.Fields.FixVersions[0].Name] = Ticket{
 				Key:         jIssue.Key,
-				Description: jIssue.Fields.Issuetype.Description,
+				Description: xhtml.ConvertDescriptionToXHTML(jIssue.Fields.Description),
 			}
 		}
 	}

@@ -3,7 +3,6 @@ package versions
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thoas/go-funk"
 	. "html_to_xhtml_converter/config"
 	. "html_to_xhtml_converter/jira"
 	"os"
@@ -70,55 +69,38 @@ func loadMocks(filename string) ProjectVersionsMocks {
 }
 
 func generateXHTML(versions ProjectVersions, mocks ProjectVersionsMocks, config Config) string {
-
 	// Start XHTML document with table
 	xhtml := "<table>\n"
-	xhtml += "<tr><<th>Version</th><th>Release Notes Description</th></tr>\n"
+	xhtml += "<tr><th>Version</th><th>Release Notes Description</th></tr>\n"
 
-	// Add components to XHTML
-	processedComponentsVersions := []string{}
-	for _, comp := range versions {
-		if !funk.Contains(processedComponentsVersions, comp.JiraVer) && comp.JiraVer != "" {
-			releaseNotesTickets := GetReleaseNotesTicketsByVersion(config, comp.JiraVer)
-			description := "DESCRIPTION"
-			if len(releaseNotesTickets) > 0 {
-				description = releaseNotesTickets[comp.JiraVer].Description
-			}
-			xhtml += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", comp.JiraVer, description)
-			processedComponentsVersions = append(processedComponentsVersions, comp.JiraVer)
-		}
-	}
-
-	// Add connectors to XHTML
-	processedConnectorsVersions := []string{}
-	for _, conn := range mocks.Connectors {
-		if !funk.Contains(processedConnectorsVersions, conn.JiraVer) && conn.JiraVer != "" {
-			releaseNotesTickets := GetReleaseNotesTicketsByVersion(config, conn.JiraVer)
-			description := "DESCRIPTION"
-			if len(releaseNotesTickets) > 0 {
-				description = releaseNotesTickets[conn.JiraVer].Description
-			}
-			xhtml += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", conn.JiraVer, description)
-			processedConnectorsVersions = append(processedConnectorsVersions, conn.JiraVer)
-		}
-	}
-
-	// Add mocks to XHTML
-	processedMocksVersions := []string{}
-	for _, mock := range mocks.Mocks {
-		if !funk.Contains(processedMocksVersions, mock.JiraVer) && mock.JiraVer != "" {
-			releaseNotesTickets := GetReleaseNotesTicketsByVersion(config, mock.JiraVer)
-			description := "DESCRIPTION"
-			if len(releaseNotesTickets) > 0 {
-				description = releaseNotesTickets[mock.JiraVer].Description
-			}
-			xhtml += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", mock.JiraVer, description)
-			processedMocksVersions = append(processedMocksVersions, mock.JiraVer)
-		}
-	}
+	// Process and add components, connectors, and mocks
+	xhtml += processItems(versions, config)
+	xhtml += processItems(mocks.Connectors, config)
+	xhtml += processItems(mocks.Mocks, config)
 
 	// Close table
 	xhtml += "</table>\n"
 
 	return xhtml
+}
+
+func processItems(items map[string]Component, config Config) string {
+	var result string
+	processedVersions := make(map[string]bool)
+
+	for _, item := range items {
+		if !processedVersions[item.JiraVer] && item.JiraVer != "" {
+			releaseNotesTickets := GetReleaseNotesTicketsByVersion(config, item.JiraVer)
+			description := "DESCRIPTION"
+			jiraVer := item.JiraVer
+			if len(releaseNotesTickets) > 0 {
+				description = releaseNotesTickets[item.JiraVer].Description
+				jiraVer = fmt.Sprintf("<a href=\"%s/browse/%s\">%s</a>", config.JiraBaseUrl, releaseNotesTickets[item.JiraVer].Key, jiraVer)
+			}
+			result += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", jiraVer, description)
+			processedVersions[item.JiraVer] = true
+		}
+	}
+
+	return result
 }
