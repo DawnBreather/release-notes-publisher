@@ -29,12 +29,12 @@ type Version struct {
 }
 
 // The desired map structure
-type issue struct {
+type Ticket struct {
 	Key         string
 	Description string
 }
 
-func Parse(jsonResponse []byte) map[string]issue {
+func parseTickets(jsonResponse []byte) map[string]Ticket {
 	// Unmarshal JSON to the struct
 	var resp Response
 	err := json.Unmarshal([]byte(jsonResponse), &resp)
@@ -44,10 +44,10 @@ func Parse(jsonResponse []byte) map[string]issue {
 	}
 
 	// Extract data and populate the map
-	issuesMap := make(map[string]issue)
+	ticketMap := make(map[string]Ticket)
 	for _, jIssue := range resp.Issues {
 		if len(jIssue.Fields.FixVersions) > 0 {
-			issuesMap[jIssue.Fields.FixVersions[0].Name] = issue{
+			ticketMap[jIssue.Fields.FixVersions[0].Name] = Ticket{
 				Key:         jIssue.Key,
 				Description: jIssue.Fields.Issuetype.Description,
 			}
@@ -55,5 +55,5 @@ func Parse(jsonResponse []byte) map[string]issue {
 	}
 
 	// Print the map or use it as needed
-	return issuesMap
+	return ticketMap
 }

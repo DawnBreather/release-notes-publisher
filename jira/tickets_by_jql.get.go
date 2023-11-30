@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func GetReleaseNotesTicketsByVersion(jiraBaseUrl, fixVersion, authBearerToken string) []byte {
+func getReleaseNotesTicketsByVersion(jiraBaseUrl, fixVersion, authBearerToken string) []byte {
 
 	url := fmt.Sprintf("%s/rest/api/2/search", jiraBaseUrl)
 	method := "POST"
