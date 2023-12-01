@@ -19,6 +19,12 @@ type Issue struct {
 type Fields struct {
 	Description string    `json:"description"`
 	FixVersions []Version `json:"fixVersions"`
+	Status      Status    `json:"status"`
+	Summary     string    `json:"summary"`
+}
+
+type Status struct {
+	Name string `json:"name"`
 }
 
 //type Issuetype struct {
@@ -33,6 +39,8 @@ type Version struct {
 type Ticket struct {
 	Key         string
 	Description string
+	Summary     string
+	Status      string
 }
 
 func parseTickets(jsonResponse []byte) map[string]Ticket {
@@ -51,6 +59,8 @@ func parseTickets(jsonResponse []byte) map[string]Ticket {
 			ticketMap[jIssue.Fields.FixVersions[0].Name] = Ticket{
 				Key:         jIssue.Key,
 				Description: xhtml.ConvertDescriptionToXHTML(jIssue.Fields.Description),
+				Summary:     jIssue.Fields.Summary,
+				Status:      jIssue.Fields.Status.Name,
 			}
 		}
 	}

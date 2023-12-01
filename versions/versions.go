@@ -71,7 +71,7 @@ func loadMocks(filename string) ProjectVersionsMocks {
 func generateXHTML(versions ProjectVersions, mocks ProjectVersionsMocks, config Config) string {
 	// Start XHTML document with table
 	xhtml := "<table>\n"
-	xhtml += "<tr><th>Version</th><th>Release Notes Description</th></tr>\n"
+	xhtml += "<tr><th>Version</th><th>Release Notes Description</th><th>Jira Link</th></tr>\n"
 
 	// Process and add components, connectors, and mocks
 	xhtml += processItems(versions, config)
@@ -93,11 +93,14 @@ func processItems(items map[string]Component, config Config) string {
 			releaseNotesTickets := GetReleaseNotesTicketsByVersion(config, item.JiraVer)
 			description := "DESCRIPTION"
 			jiraVer := item.JiraVer
+			jiraLink := ""
 			if len(releaseNotesTickets) > 0 {
 				description = releaseNotesTickets[item.JiraVer].Description
-				jiraVer = fmt.Sprintf("<a href=\"%s/browse/%s\">%s</a>", config.JiraBaseUrl, releaseNotesTickets[item.JiraVer].Key, jiraVer)
+				//jiraVer = fmt.Sprintf("<a href=\"%s/browse/%s\">%s</a>", config.JiraBaseUrl, releaseNotesTickets[item.JiraVer].Key, jiraVer)
+				jiraLink = fmt.Sprintf(`<span class="jira-issue" data-jira-key="DEV-8295"><a href="https://bildungsraum.vdivde-it.de/jira/browse/DEV-8295" class="jira-issue-key"><img class="icon" src="https://bildungsraum.vdivde-it.de/jira/secure/viewavatar?size=xsmall&amp;avatarId=10300&amp;avatarType=issuetype">DEV-8295</a>-<span class="summary">Release notes</span><span class="aui-lozenge aui-lozenge-subtle aui-lozenge-current jira-macro-single-issue-export-pdf">IN REVIEW</span></span>`)
+				jiraLink = fmt.Sprintf(`<span class="jira-issue" data-jira-key="%s"><a href="%s/browse/%s" class="jira-issue-key"><img class="icon" src="%s/secure/viewavatar?size=xsmall&amp;avatarId=10300&amp;avatarType=issuetype">%s</a>-<span class="summary">%s</span><span class="aui-lozenge aui-lozenge-subtle aui-lozenge-current jira-macro-single-issue-export-pdf">%s</span></span>`, releaseNotesTickets[item.JiraVer].Key, config.JiraBaseUrl, releaseNotesTickets[item.JiraVer].Key, config.JiraBaseUrl, releaseNotesTickets[item.JiraVer].Key, releaseNotesTickets[item.JiraVer].Summary, releaseNotesTickets[item.JiraVer].Status)
 			}
-			result += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>\n", jiraVer, description)
+			result += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n", jiraVer, description, jiraLink)
 			processedVersions[item.JiraVer] = true
 		}
 	}
