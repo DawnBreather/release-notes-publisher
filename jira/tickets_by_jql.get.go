@@ -12,7 +12,7 @@ func getReleaseNotesTicketsByVersion(jiraBaseUrl, fixVersion, authBearerToken st
 	url := fmt.Sprintf("%s/rest/api/2/search", jiraBaseUrl)
 	method := "POST"
 
-	payload := strings.NewReader(fmt.Sprintf(`{"jql": "issuetype in (\"Release Note\") AND fixVersion in (%s)", "maxResults": 1000}`, fixVersion))
+	payload := strings.NewReader(fmt.Sprintf(`{"jql": "issuetype in (\"Release Note\") AND fixVersion in (%s) AND status not in (REJECTED)", "maxResults": 1000}`, fixVersion))
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
